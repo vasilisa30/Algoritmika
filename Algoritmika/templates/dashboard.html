@@ -1,0 +1,94 @@
+<!-- templates/users/dashboard.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            background: #007bff;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .logout {
+            float: right;
+            color: white;
+            text-decoration: none;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .info-row {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        .info-label {
+            font-weight: bold;
+            display: inline-block;
+            width: 100px;
+        }
+        .role-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .role-student { background: #4CAF50; color: white; }
+        .role-parent { background: #2196F3; color: white; }
+        .role-employee { background: #FF9800; color: white; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="/logout/" class="logout">🚪 Выйти</a>
+        <h1>{{ title }}</h1>
+    </div>
+    
+    <div class="card">
+        <h2>Добро пожаловать!</h2>
+        <div class="info-row">
+            <span class="info-label">ФИО:</span>
+            {{ user.last_name }} {{ user.first_name }} {{ user.middle_name }}
+        </div>
+        <div class="info-row">
+            <span class="info-label">Логин:</span>
+            {{ user.username }}
+        </div>
+        <div class="info-row">
+            <span class="info-label">Роль:</span>
+            <span class="role-badge role-{{ user.role }}">
+                {% if user.role == 'student' %}Ученик
+                {% elif user.role == 'parent' %}Родитель
+                {% else %}Сотрудник
+                {% endif %}
+            </span>
+        </div>
+        {% if user.phone %}
+        <div class="info-row">
+            <span class="info-label">Телефон:</span>
+            {{ user.phone }}
+        </div>
+        {% endif %}
+        {% if user.email %}
+        <div class="info-row">
+            <span class="info-label">Email:</span>
+            {{ user.email }}
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

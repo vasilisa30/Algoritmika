@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,46 +26,51 @@ SECRET_KEY = 'django-insecure-3rp--h&j7$ywgon%%p8d9_=)r+ld@7yy0_@sle)ix(#incix9^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+ROOT_URLCONF = 'Algoritmika.urls'
 ALLOWED_HOSTS = []
 
 
 # Application definition
 
+# school_project/settings.py
+
+# ЗАКОММЕНТИРУЙТЕ или УДАЛИТЕ строчку 'django.contrib.auth'
+# school_project/settings.py
+
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.messages',
     'django.contrib.staticfiles',
+    'users',
 ]
 
+# Минимальный MIDDLEWARE
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'Algoritmika.urls'
-
+# Отключаем сессии для начала (потом включим)
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # <- ЭТА СТРОКА ВАЖНА
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
 ]
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 5400  # 1.5 часа
 
 WSGI_APPLICATION = 'Algoritmika.wsgi.application'
 
@@ -74,8 +80,13 @@ WSGI_APPLICATION = 'Algoritmika.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'mssql',
+        'NAME': 'Algoritmica',          # конкретное имя БД, не сервера
+        'HOST': 'VAS\\SQLEXPRESS', # ВАЖНО: двойной слэш
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server',
+            'trusted_connection': 'yes',
+        },
     }
 }
 

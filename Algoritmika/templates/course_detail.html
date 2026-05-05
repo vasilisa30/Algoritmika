@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }}</title>
+  <style>
+    :root{
+      --bg1:#667eea;
+      --bg2:#764ba2;
+      --card:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --good:#16a34a;
+      --warn:#b45309;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color:var(--text);
+      background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%);
+      min-height:100vh;
+    }
+    .wrap{max-width:1600px;margin:0 auto;padding:16px 18px 26px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;color:white}
+    .topbar h1{margin:0;font-size:20px;font-weight:800}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    a.btn{
+      color:white;text-decoration:none;font-weight:700;
+      background: rgba(255,255,255,0.14);
+      border:1px solid rgba(255,255,255,0.22);
+      padding:8px 12px;border-radius:12px;
+    }
+    .grid{display:grid;grid-template-columns: 1fr 1fr;gap:14px}
+    @media (max-width: 1000px){.grid{grid-template-columns:1fr}}
+    .card{background:var(--card);border-radius:16px;box-shadow:0 16px 30px rgba(0,0,0,.10);padding:16px}
+    .sub{color:var(--muted);font-size:13px;margin-top:6px}
+    .warning{border-left:4px solid var(--warn);background:#fff7ed;padding:10px 12px;border-radius:12px;margin-bottom:14px;color:#7c2d12;font-size:13px}
+    .kv{display:grid;grid-template-columns: 160px 1fr;gap:8px 10px;font-size:14px;border-top:1px solid var(--line);padding-top:12px;margin-top:10px}
+    .k{color:var(--muted)} .v{font-weight:600}
+    .badge{display:inline-block;padding:3px 8px;border-radius:999px;font-size:12px;background:#eef2ff;color:#3730a3;border:1px solid #e0e7ff;white-space:nowrap}
+    .progress{margin-top:10px;background:#f3f4f6;border-radius:999px;overflow:hidden;height:10px;border:1px solid #e5e7eb}
+    .bar{height:100%;background: linear-gradient(90deg, #22c55e, #16a34a)}
+    details{border:1px solid var(--line);border-radius:14px;background:#fafafa;overflow:hidden}
+    details+details{margin-top:10px}
+    summary{cursor:pointer;padding:12px 12px;font-weight:800;display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .inner{padding:0 12px 12px}
+    .lesson{border-top:1px dashed var(--line);padding:10px 0}
+    .lesson:first-child{border-top:none}
+    .muted{color:var(--muted)}
+    .mini{font-size:12px;color:var(--muted);margin-top:2px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <h1>{{ title }}</h1>
+        {% if course and course.status_name %}
+          <div class="sub">Статус: {{ course.status_name }}</div>
+        {% endif %}
+      </div>
+      <div class="actions">
+        <a class="btn" href="{% url 'student_dashboard' %}">К кабинету</a>
+        <a class="btn" href="{% url 'logout' %}">Выйти</a>
+      </div>
+    </div>
+
+    {% if db_warning %}
+      <div class="warning"><b>Внимание:</b> {{ db_warning }}</div>
+    {% endif %}
+
+    <div class="grid">
+      <div class="card">
+        <div class="sub">Описание и параметры курса</div>
+        {% if course %}
+          <div class="kv">
+            <div class="k">Курс</div>
+            <div class="v">{{ course.title }}</div>
+
+            {% if course.description %}
+              <div class="k">Описание</div>
+              <div class="v">{{ course.description }}</div>
+            {% endif %}
+
+            {% if course.age_group %}
+              <div class="k">Возраст</div>
+              <div class="v">{{ course.age_group }}</div>
+            {% endif %}
+
+            {% if course.difficulty %}
+              <div class="k">Сложность</div>
+              <div class="v">{{ course.difficulty }}</div>
+            {% endif %}
+          </div>
+        {% else %}
+          <div class="muted">Курс не найден.</div>
+        {% endif %}
+      </div>
+
+      <div class="card">
+        <div class="sub">Прогресс ученика по курсу</div>
+        <div class="kv">
+          <div class="k">Уроков</div>
+          <div class="v">{{ progress.lessons_total }}</div>
+
+          <div class="k">Заданий</div>
+          <div class="v">{{ progress.assignments_done }} / {{ progress.assignments_total }}</div>
+
+          <div class="k">Выполнение</div>
+          <div class="v">{{ progress.assignments_done_percent }}%</div>
+        </div>
+        <div class="progress" aria-label="progress">
+          <div class="bar" style="width: {{ progress.assignments_done_percent }}%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px;">
+      <div class="sub">Состав курса: модули → уроки → задания</div>
+
+      {% if modules and modules|length %}
+        {% for m in modules %}
+          <details>
+            <summary>
+              <span>{{ m.title }}</span>
+              <span class="row">
+                <span class="badge">уроков: {{ m.lessons_total }}</span>
+                <span class="badge">заданий: {{ m.assignments_done }}/{{ m.assignments_total }}</span>
+              </span>
+            </summary>
+            <div class="inner">
+              {% if m.goal %}<div class="mini">Цель: {{ m.goal }}</div>{% endif %}
+              {% if m.lessons and m.lessons|length %}
+                {% for l in m.lessons %}
+                  <div class="lesson">
+                    <div class="row" style="justify-content:space-between;">
+                      <div>
+                        <b>{{ l.title }}</b>
+                        {% if l.description %}<div class="mini">{{ l.description }}</div>{% endif %}
+                      </div>
+                      <span class="badge">заданий: {{ l.assignments_done }}/{{ l.assignments_total }}</span>
+                    </div>
+                    {% if l.homework %}<div class="mini">Домашка: {{ l.homework }}</div>{% endif %}
+
+                    {% if l.assignments and l.assignments|length %}
+                      <div class="mini" style="margin-top:8px;">
+                        {% for a in l.assignments %}
+                          <span class="badge" style="margin:4px 6px 0 0; {% if a.is_done %}border-color:#bbf7d0;background:#f0fdf4;color:var(--good){% endif %}">
+                            {{ a.title }}{% if a.is_done %} (сдано){% endif %}
+                          </span>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              {% else %}
+                <div class="muted">Уроки для модуля не найдены.</div>
+              {% endif %}
+            </div>
+          </details>
+        {% endfor %}
+      {% else %}
+        <div class="muted">Модули по этому курсу не найдены.</div>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>
+
